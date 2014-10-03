@@ -147,11 +147,49 @@ class Paypal
     opts["PROFILESTARTDATE"] = @_formatDate(opts["PROFILESTARTDATE"])
     
     @makeAPIrequest @getParams(opts), (err, response) ->
-      
-      return callback err, null if err
+      return callback err, response if err
+      return callback err ? true, response if response["ACK"] isnt "Success"
 
+      callback err, response
+
+# adding functions 
+  doExpressCheckoutPayment: (token, payerid, opts, callback)->
+    throw new Error "Missing checkout token" unless token
+
+    opts = @_merge({
+      METHOD:    "DoExpressCheckoutPayment"
+      TOKEN: token
+      PAYERID: payerid
+    }, opts ? {})
+
+    @makeAPIrequest @getParams(opts), (err, response) ->
+      console.log response
+      return callback err, response if err
       return callback err ? true, null if response["ACK"] isnt "Success"
+      callback err, response
 
+  billOutstandingAmount: (profileid, opts, callback)->
+    opts = @_merge({
+      METHOD:    "BillOutstandingAmount"
+      PROFILEID: profileid
+    }, opts ? {})
+
+    @makeAPIrequest @getParams(opts), (err, response) ->
+      console.log response
+      return callback err, response if err
+      return callback err ? true, null if response["ACK"] isnt "Success"
+      callback err, response
+
+  getExpressCheckoutDetails: (token, callback) ->
+    throw new Error "Missing checkout token" unless token
+    params = @getParams(
+      METHOD:    "GetExpressCheckoutDetails"
+      TOKEN: token
+    )
+
+    @makeAPIrequest params, (err, response) ->
+      return callback err, null if err
+      return callback err ? true, null if response["ACK"] isnt "Success"
       callback err, response
 
   # Returns subscription information for an already created subscription by
@@ -220,9 +258,7 @@ class Paypal
     params["NOTE"] = note if typeof note is "string"
 
     @makeAPIrequest params, (err, response) ->
-      
-      return callback err, null if err
-
+      return callback err, response if err
       return callback err ? true, null if response["ACK"] isnt "Success"
 
       callback err, response
