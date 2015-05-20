@@ -163,7 +163,19 @@ class Paypal
     }, opts ? {})
 
     @makeAPIrequest @getParams(opts), (err, response) ->
-      console.log response
+      return callback err, response if err
+      return callback err ? true, response if response["ACK"] isnt "Success"
+      callback err, response
+  
+  updateRecurringPaymentsProfile: (id, opts, callback)->
+    throw new Error "Missing checkout token" unless token
+
+    opts = @_merge({
+      METHOD:    "UpdateRecurringPaymentsProfile"
+      PROFILEID: id
+    }, opts ? {})
+
+    @makeAPIrequest @getParams(opts), (err, response) ->
       return callback err, response if err
       return callback err ? true, null if response["ACK"] isnt "Success"
       callback err, response
