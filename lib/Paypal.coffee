@@ -91,8 +91,8 @@ class Paypal
     }, opts)
 
     @makeAPIrequest @getParams(opts), (err, response) ->
-      return callback err, null, null if err
-
+      return callback err, response if err
+      return callback err ? true, response if response["ACK"] isnt "Success"
       return callback "Missing token", null, null unless response["TOKEN"]
 
       callback null, response, self.checkoutUrl + response["TOKEN"]
@@ -168,7 +168,6 @@ class Paypal
       callback err, response
   
   updateRecurringPaymentsProfile: (id, opts, callback)->
-    throw new Error "Missing checkout token" unless token
 
     opts = @_merge({
       METHOD:    "UpdateRecurringPaymentsProfile"
@@ -177,7 +176,7 @@ class Paypal
 
     @makeAPIrequest @getParams(opts), (err, response) ->
       return callback err, response if err
-      return callback err ? true, null if response["ACK"] isnt "Success"
+      return callback err ? true, response if response["ACK"] isnt "Success"
       callback err, response
 
   billOutstandingAmount: (profileid, opts, callback)->
@@ -189,7 +188,7 @@ class Paypal
     @makeAPIrequest @getParams(opts), (err, response) ->
       console.log response
       return callback err, response if err
-      return callback err ? true, null if response["ACK"] isnt "Success"
+      return callback err ? true, response if response["ACK"] isnt "Success"
       callback err, response
 
   getExpressCheckoutDetails: (token, callback) ->
@@ -201,7 +200,7 @@ class Paypal
 
     @makeAPIrequest params, (err, response) ->
       return callback err, null if err
-      return callback err ? true, null if response["ACK"] isnt "Success"
+      return callback err ? true, response if response["ACK"] isnt "Success"
       callback err, response
 
   # Returns subscription information for an already created subscription by
@@ -232,7 +231,7 @@ class Paypal
       
       return callback err, null if err
 
-      return callback err ? true, null if response["ACK"] isnt "Success"
+      return callback err ? true, response if response["ACK"] isnt "Success"
 
       callback err, response
 
@@ -271,7 +270,7 @@ class Paypal
 
     @makeAPIrequest params, (err, response) ->
       return callback err, response if err
-      return callback err ? true, null if response["ACK"] isnt "Success"
+      return callback err ? true, response if response["ACK"] isnt "Success"
 
       callback err, response
 
@@ -290,6 +289,10 @@ class Paypal
 
       # Non HTTP-200 response from API
       if response.statusCode isnt 200
+        return callback querystring.parse(body) ? response.statusCode, null
+
+      # ACK failed response from API
+      if response["ACK"] isnt "Success"
         return callback querystring.parse(body) ? response.statusCode, null
 
       # Sailing smoothly. Parse query-string formatted body and return.
