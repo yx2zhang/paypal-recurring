@@ -292,7 +292,9 @@ class Paypal
         return callback querystring.parse(body) ? response.statusCode, null
 
       # ACK failed response from API
-      if response["ACK"] isnt "Success"
+      res = querystring.parse(body) ? response.statusCode
+
+      if res["ACK"] isnt "Success"
         return callback querystring.parse(body) ? response.statusCode, null
 
       # Sailing smoothly. Parse query-string formatted body and return.
