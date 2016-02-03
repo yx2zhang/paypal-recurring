@@ -153,7 +153,7 @@ class Paypal
       callback err, response
 
 # adding functions 
-  transactionSearch: (params, callback)->
+  transactionSearch: (opts, callback)->
     opts = @_merge({
       METHOD: "TransactionSearch"
     }, opts ? {})
@@ -209,7 +209,6 @@ class Paypal
     }, opts ? {})
 
     @makeAPIrequest @getParams(opts), (err, response) ->
-      console.log response
       return callback err, response if err
       return callback err ? true, response if response["ACK"] isnt "Success"
       callback err, response
