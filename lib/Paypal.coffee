@@ -153,6 +153,29 @@ class Paypal
       callback err, response
 
 # adding functions 
+  transactionSearch: (params, callback)->
+    opts = @_merge({
+      METHOD: "TransactionSearch"
+    }, opts ? {})
+
+    @makeAPIrequest @getParams(opts), (err, response) ->
+      return callback err, response if err
+      return callback err ? true, response if response["ACK"] isnt "Success"
+      callback err, response
+
+  getTransactionDetails: (transId, callback)->
+    throw new Error "Missing transId" unless transId
+
+    opts = @_merge({
+      METHOD: "GetTransactionDetails"
+      TRANSACTIONID: transId
+    }, opts ? {})
+
+    @makeAPIrequest @getParams(opts), (err, response) ->
+      return callback err, response if err
+      return callback err ? true, response if response["ACK"] isnt "Success"
+      callback err, response
+
   doExpressCheckoutPayment: (token, payerid, opts, callback)->
     throw new Error "Missing checkout token" unless token
 
