@@ -152,7 +152,7 @@ class Paypal
 
       callback err, response
 
-# adding functions 
+# new functions added
   transactionSearch: (opts, callback)->
     opts = @_merge({
       METHOD: "TransactionSearch"
